@@ -1,0 +1,48 @@
+{
+  "name": "prefactor-open-dashboard",
+  "version": "0.1.0",
+  "private": false,
+  "license": "MIT",
+  "description": "Open-source local dashboard for Prefactor agent telemetry: risk, quality, and cost, computed from your own account's raw spans.",
+  "keywords": [
+    "prefactor",
+    "ai-agents",
+    "observability",
+    "dashboard",
+    "llm",
+    "telemetry",
+    "agent-monitoring"
+  ],
+  "homepage": "https://github.com/prefactordev/prefactor-open-dashboard#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/prefactordev/prefactor-open-dashboard.git"
+  },
+  "bugs": {
+    "url": "https://github.com/prefactordev/prefactor-open-dashboard/issues"
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "server": "node server.mjs",
+    "build": "tsc --noEmit && vite build",
+    "prestart": "node scripts/ensure-build.mjs",
+    "start": "node server.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=18.17"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "recharts": "^2.15.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5.6.3",
+    "vite": "^6.4.3"
+  }
+}

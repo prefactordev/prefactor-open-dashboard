@@ -1,0 +1,609 @@
+/* Design tokens — Prefactor brand. Dark (near-black green + teal accent) is
+   the brand-primary look and the default; light derives from the same hues.
+   Dark values mirror prefactor.tech's v2 tokens. The [data-theme] stamp wins
+   over the OS preference in both directions. */
+:root {
+  color-scheme: light;
+  --page: #f6faf8;
+  --surface-1: #fcfdfd;
+  --text-primary: #06110e;
+  --text-secondary: #46564f;
+  --muted: #71827b;
+  --gridline: #e0e8e4;
+  --baseline: #c1cdc7;
+  --border: rgba(6, 17, 14, 0.1);
+  --accent: #077a63;
+  --on-accent: #ffffff;
+  --good-text: #056e46;
+  --danger-text: #b32626;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #05100d;
+    --surface-1: #0a1613;
+    --text-primary: #f2f7f5;
+    --text-secondary: #9fb2ac;
+    --muted: #61736d;
+    --gridline: #16241f;
+    --baseline: #2a3833;
+    --border: rgba(255, 255, 255, 0.08);
+    --accent: #08caa6;
+    --on-accent: #05100d;
+    --good-text: #0ca30c;
+    --danger-text: #e66767;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #05100d;
+  --surface-1: #0a1613;
+  --text-primary: #f2f7f5;
+  --text-secondary: #9fb2ac;
+  --muted: #61736d;
+  --gridline: #16241f;
+  --baseline: #2a3833;
+  --border: rgba(255, 255, 255, 0.08);
+  --accent: #08caa6;
+  --on-accent: #05100d;
+  --good-text: #0ca30c;
+  --danger-text: #e66767;
+}
+
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--text-primary);
+  font: 14px/1.45 "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.app {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 20px 24px 64px;
+}
+
+/* --- header + filter row -------------------------------------------------- */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap; /* never force the page to scroll sideways on a narrow window */
+}
+
+/* Keyboard users need to see where they are; the toggles and tabs had no
+   visible focus ring at all. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Respect a reduced-motion preference across the whole app. */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+.topbar h1 {
+  font-size: 17px;
+  font-weight: 650;
+  margin: 0;
+}
+.topbar .spacer {
+  flex: 1;
+}
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.wordmark svg {
+  width: 22px;
+  height: 22px;
+  color: var(--text-primary);
+  flex: none;
+}
+
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.filters .hint {
+  color: var(--muted);
+  font-size: 12px;
+  margin-left: auto;
+}
+
+.seg {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-1);
+  overflow: hidden;
+}
+.seg button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 13px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+.seg button:hover {
+  color: var(--text-primary);
+}
+.seg button[aria-pressed="true"] {
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+}
+
+select.agent-picker {
+  font: inherit;
+  font-size: 13px;
+  color: var(--text-primary);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  max-width: 260px;
+}
+
+button.ghost {
+  appearance: none;
+  font: inherit;
+  font-size: 13px;
+  color: var(--text-secondary);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+button.ghost:hover {
+  color: var(--text-primary);
+}
+
+/* --- tabs ----------------------------------------------------------------- */
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--gridline);
+  margin-bottom: 20px;
+}
+.tabs button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  padding: 8px 14px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+.tabs button:hover {
+  color: var(--text-primary);
+}
+.tabs button[aria-selected="true"] {
+  color: var(--text-primary);
+  font-weight: 600;
+  border-bottom-color: var(--accent);
+}
+
+/* --- layout grids ---------------------------------------------------------- */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.grid-21 {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+/* 1060px, not 860px: the activity heatmap needs ~460px of card width, so
+   between ~861 and ~1044px it was silently scrolling inside its own card and
+   the last hours of the week just looked absent — 1024px laptops sat squarely
+   in that band. */
+@media (max-width: 1060px) {
+  .grid-2,
+  .grid-21 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- cards ----------------------------------------------------------------- */
+.card {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  min-width: 0;
+}
+.card-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.card-head h3 {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+.card-head .sub {
+  color: var(--muted);
+  font-size: 12px;
+}
+.card-head .toggle {
+  margin-left: auto;
+}
+.card-head .toggle button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+.card-head .toggle button[aria-pressed="true"] {
+  color: var(--text-primary);
+  background: var(--page);
+}
+
+.stat .label {
+  color: var(--text-secondary);
+  font-size: 12.5px;
+}
+.stat .value {
+  font-size: 26px;
+  font-weight: 650;
+  margin-top: 2px;
+}
+.stat .detail {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 2px;
+}
+.stat .delta-good {
+  color: var(--good-text);
+}
+.stat .delta-bad {
+  color: var(--danger-text);
+}
+
+/* --- legend ----------------------------------------------------------------- */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.legend .key {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.legend .swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex: none;
+}
+.legend .line-key {
+  width: 14px;
+  height: 2px;
+  border-radius: 1px;
+  flex: none;
+}
+
+/* --- tooltip ---------------------------------------------------------------- */
+.viz-tooltip {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  padding: 8px 10px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.viz-tooltip .when {
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.viz-tooltip .row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+.viz-tooltip .row .k {
+  width: 12px;
+  height: 2px;
+  border-radius: 1px;
+  flex: none;
+}
+.viz-tooltip .row .v {
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-left: auto;
+  padding-left: 12px;
+}
+
+/* --- tables ----------------------------------------------------------------- */
+table.viz {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+table.viz th {
+  text-align: left;
+  color: var(--muted);
+  font-weight: 500;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--gridline);
+  white-space: nowrap;
+}
+table.viz td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--gridline);
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+table.viz tr:last-child td {
+  border-bottom: 0;
+}
+table.viz td.num,
+table.viz th.num {
+  text-align: right;
+}
+table.viz td.strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+.table-scroll {
+  overflow-x: auto;
+}
+
+/* --- bar list (horizontal) --------------------------------------------------- */
+.barlist .row {
+  display: grid;
+  grid-template-columns: minmax(90px, 180px) 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+}
+.barlist .name {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.barlist .track {
+  height: 14px;
+  display: flex;
+  align-items: center;
+}
+.barlist .fill {
+  height: 14px;
+  border-radius: 0 4px 4px 0;
+  min-width: 2px;
+}
+.barlist .val {
+  font-size: 12.5px;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- states ----------------------------------------------------------------- */
+.refetching {
+  opacity: 0.55;
+  transition: opacity 0.15s;
+}
+.empty {
+  color: var(--text-secondary);
+  font-size: 13px;
+  padding: 28px 20px;
+  text-align: center;
+}
+.empty h4 {
+  color: var(--text-primary);
+  margin: 0 0 6px;
+  font-size: 14px;
+}
+.empty code {
+  background: var(--page);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1px 6px;
+  font-size: 12px;
+}
+.notice {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+.notice.warn {
+  border-left-color: #ec835a;
+}
+.error-box {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-left: 3px solid #d03b3b;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.summary-block {
+  border: 1px solid var(--gridline);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+}
+.summary-block .meta {
+  color: var(--muted);
+  font-size: 11.5px;
+  margin-bottom: 4px;
+}
+
+/* --- heatmap ------------------------------------------------------------------ */
+.heatmap {
+  display: grid;
+  grid-template-columns: 34px repeat(24, minmax(14px, 1fr));
+  gap: 2px;
+  min-width: 460px;
+}
+.hm-corner {
+}
+.hm-hour,
+.hm-dow {
+  font-size: 10.5px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+}
+.hm-hour {
+  justify-content: center;
+}
+.hm-cell {
+  aspect-ratio: 1 / 1.15;
+  border-radius: 3px;
+}
+
+/* --- admin modal ------------------------------------------------------------- */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: grid;
+  place-items: center;
+  z-index: 20;
+  padding: 20px;
+}
+.modal {
+  width: 100%;
+  max-width: 460px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+}
+.modal-note {
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  margin: 0 0 12px;
+}
+.modal-note code {
+  background: var(--page);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 0 4px;
+  font-size: 11.5px;
+}
+.field {
+  display: block;
+  margin-bottom: 12px;
+}
+.field span {
+  display: block;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+.field span em {
+  color: var(--muted);
+  font-style: normal;
+}
+.field input {
+  width: 100%;
+  font: inherit;
+  font-size: 13px;
+  color: var(--text-primary);
+  background: var(--page);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+.field input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+button.primary {
+  appearance: none;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--on-accent);
+  background: var(--accent);
+  border: 0;
+  border-radius: 8px;
+  padding: 7px 14px;
+  cursor: pointer;
+}
+button.primary:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.risk-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.risk-chip .dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: none;
+}
