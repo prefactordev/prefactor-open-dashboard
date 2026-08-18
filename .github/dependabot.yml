@@ -11,6 +11,23 @@ updates:
         dependency-type: development
       production-dependencies:
         dependency-type: production
+    ignore:
+      # typescript-eslint's peer range doesn't admit TS >= 6 yet; lift this
+      # once https://typescript-eslint.io ships support.
+      - dependency-name: typescript
+        versions: [">=6"]
+      # React 19 + Recharts 3 is a deliberate migration (types, breaking chart
+      # APIs), not an auto-bump. Minors and patches still flow.
+      - dependency-name: react
+        update-types: [version-update:semver-major]
+      - dependency-name: react-dom
+        update-types: [version-update:semver-major]
+      - dependency-name: "@types/react"
+        update-types: [version-update:semver-major]
+      - dependency-name: "@types/react-dom"
+        update-types: [version-update:semver-major]
+      - dependency-name: recharts
+        update-types: [version-update:semver-major]
   - package-ecosystem: github-actions
     directory: /
     schedule:
