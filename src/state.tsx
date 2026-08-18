@@ -15,6 +15,13 @@ const RANGE_MS: Record<TimeRangeKey, number> = {
   "90d": 90 * 86400e3,
 };
 
+/**
+ * Agent filter scope: a specific agent id, or the literal "all".
+ * `string & {}` keeps "all" a distinct, autocompletable member of the union
+ * instead of being absorbed into `string`.
+ */
+export type AgentScope = "all" | (string & {});
+
 export interface DashboardData {
   agents: Agent[];
   agentName: (id: string | null | undefined) => string;
@@ -30,8 +37,8 @@ export interface DashboardData {
   windowEnd: string;
   range: TimeRangeKey;
   setRange: (r: TimeRangeKey) => void;
-  agentId: string | "all";
-  setAgentId: (id: string | "all") => void;
+  agentId: AgentScope;
+  setAgentId: (id: AgentScope) => void;
   loading: boolean;
   refetching: boolean; // filter changed — dim the previous render
   backfilling: boolean; // server still walking history for this scope
@@ -61,7 +68,7 @@ export function useDashboard(): DashboardData {
 
 export function DataProvider({ children }: { children: ReactNode }) {
   const [range, setRange] = useState<TimeRangeKey>("7d");
-  const [agentId, setAgentId] = useState<string | "all">("all");
+  const [agentId, setAgentId] = useState<AgentScope>("all");
   const [snap, setSnap] = useState<DataSnapshot | null>(null);
   const [requestedStart, setRequestedStart] = useState<string>("");
   const [windowEnd, setWindowEnd] = useState<string>(() => new Date().toISOString());
@@ -72,7 +79,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [nonce, setNonce] = useState(0);
   const generation = useRef(0);
   const scope = useRef({ range, agentId });
-  scope.current = { range, agentId };
+  // Synced in an effect (not during render) and declared BEFORE the reload
+  // effect below: effects run top-down, so the scope is current by the time
+  // load(true) reads it.
+  useEffect(() => {
+    scope.current = { range, agentId };
+  }, [range, agentId]);
 
   const inFlight = useRef<AbortController | null>(null);
 
@@ -115,6 +127,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   // Filter changes: full reload with the previous render dimmed.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- deliberate: `refetching` must flip synchronously with the filter change so the stale charts dim in the same frame
     void load(true);
   }, [range, agentId, nonce, load]);
 

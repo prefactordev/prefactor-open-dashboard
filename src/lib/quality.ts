@@ -180,9 +180,7 @@ function flatten(obj: unknown, prefix: string, out: Map<string, unknown>, depth 
 
 export function summarizeExternalQuality(details: InstanceDetail[], windowStart: string, windowEnd: string): ExternalQualitySummary {
   const finished = details.filter((d) => d.status !== "active");
-  const carrying = finished.filter(
-    (d) => d.quality_payload && typeof d.quality_payload === "object" && Object.keys(d.quality_payload).length > 0,
-  );
+  const carrying = finished.filter((d) => d.quality_payload && typeof d.quality_payload === "object" && Object.keys(d.quality_payload).length > 0);
 
   interface Acc {
     kind: "number" | "boolean" | "string";

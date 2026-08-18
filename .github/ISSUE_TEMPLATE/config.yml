@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security issue
+    url: https://github.com/prefactordev/prefactor-open-dashboard/blob/main/SECURITY.md
+    about: Please report token-handling or network-exposure issues privately — not as a public issue.

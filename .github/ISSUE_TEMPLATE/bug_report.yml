@@ -1,0 +1,44 @@
+name: Bug report
+description: Something broke or behaved wrong
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. **Security issues** (token exposure, network access) should go to security@prefactor.tech instead — see SECURITY.md.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you see, and what did you expect instead? Screenshots welcome.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: How can we reproduce it?
+      description: If it reproduces with `npm run demo` (synthetic data, no account needed), say so — that makes it fixable by anyone.
+      placeholder: |
+        1. npm run demo
+        2. Open the Cost tab
+        3. ...
+    validations:
+      required: true
+  - type: input
+    id: node-version
+    attributes:
+      label: Node version
+      placeholder: node --version
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: e.g. Windows 11, macOS 15, Ubuntu 24.04
+  - type: textarea
+    id: logs
+    attributes:
+      label: Server output
+      description: Anything the terminal running the server printed. **Never paste your API token.**
+      render: text

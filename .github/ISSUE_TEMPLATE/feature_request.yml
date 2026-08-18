@@ -1,0 +1,20 @@
+name: Feature request
+description: An idea for a new metric, chart, or capability
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to see or decide?
+      description: The question you want the dashboard to answer, more than the widget you want added.
+    validations:
+      required: true
+  - type: textarea
+    id: signal
+    attributes:
+      label: Where would the data come from?
+      description: If you know which span fields or API endpoints carry the signal, note them — the dashboard only computes from your account's raw spans.
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What do you do today instead?

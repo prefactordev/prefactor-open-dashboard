@@ -54,8 +54,8 @@ export function ActionsChartCard({ actions }: { actions: ActionsSummary }) {
           <p>
             Counted here: HITL approvals (a schema-name <em>segment</em> of <code>hitl</code> or <code>approval</code>, e.g.{" "}
             <code>hitl:human-approval</code> — tool spans never count), killswitch terminations (
-            <code>POST /agent_instance/&#123;id&#125;/terminate</code>), and any span carrying a human rating at{" "}
-            <code>inputs.feedback.rating</code> or <code>inputs.rating</code>, whatever its schema is called.
+            <code>POST /agent_instance/&#123;id&#125;/terminate</code>), and any span carrying a human rating at <code>inputs.feedback.rating</code>{" "}
+            or <code>inputs.rating</code>, whatever its schema is called.
           </p>
         </div>
       ) : (
@@ -77,7 +77,8 @@ export function ActionsChartCard({ actions }: { actions: ActionsSummary }) {
                   strokeWidth={2}
                   maxBarSize={24}
                   radius={i === ACTION_KINDS.length - 1 ? [4, 4, 0, 0] : undefined}
-                 isAnimationActive={false} />
+                  isAnimationActive={false}
+                />
               ))}
             </BarChart>
           </ResponsiveContainer>

@@ -36,8 +36,8 @@ export class ErrorBoundary extends Component<Props, State> {
         <div className="empty">
           <h4>This view hit an unexpected error</h4>
           <p>
-            The rest of the dashboard still works — switch tab, agent, or time range to carry on. If it keeps happening, please open an
-            issue with the message below.
+            The rest of the dashboard still works — switch tab, agent, or time range to carry on. If it keeps happening, please open an issue with the
+            message below.
           </p>
           <pre
             style={{

@@ -62,8 +62,10 @@ const unwrap = (v) => (v && typeof v === "object" && "$sensitive" in v ? v.value
 function collectSensitiveLabels(obj, out, depth = 0) {
   if (depth > 6 || obj == null || typeof obj !== "object") return;
   if ("$sensitive" in obj) {
-    if (Array.isArray(obj.labels)) for (const l of obj.labels) if (typeof l === "string") out.add(l);
-    else out.add("unlabelled");
+    if (Array.isArray(obj.labels))
+      for (const l of obj.labels)
+        if (typeof l === "string") out.add(l);
+        else out.add("unlabelled");
     return;
   }
   for (const v of Object.values(obj)) collectSensitiveLabels(v, out, depth + 1);
@@ -480,7 +482,9 @@ export function createSync({ getToken, getHost, dataDir }) {
     if (!as.backfillDone) {
       const offsets = [];
       for (let i = 0; i < BACKFILL_PAGES_PER_ROUND; i++) offsets.push(as.backfillOffset + i * PAGE_SIZE);
-      const pages = await mapLimit(offsets, PAGE_CONCURRENCY, (off) => listPage("agent_spans", { agent_id: agentId, include_risk_level: "true" }, off).catch(() => null));
+      const pages = await mapLimit(offsets, PAGE_CONCURRENCY, (off) =>
+        listPage("agent_spans", { agent_id: agentId, include_risk_level: "true" }, off).catch(() => null),
+      );
       let exhausted = false;
       let reachedHorizon = false;
       // Only advance past the pages that actually came back. A timeout or 429
@@ -548,7 +552,11 @@ export function createSync({ getToken, getHost, dataDir }) {
           added++;
         } else if (existing.status !== raw.status || existing.termination_reason !== (raw.termination_reason ?? null)) {
           // status transitions (active → complete/failed, termination) must land
-          Object.assign(existing, { status: raw.status, finished_at: raw.finished_at ?? existing.finished_at, termination_reason: raw.termination_reason ?? null });
+          Object.assign(existing, {
+            status: raw.status,
+            finished_at: raw.finished_at ?? existing.finished_at,
+            termination_reason: raw.termination_reason ?? null,
+          });
           added++;
         }
         const st = isoZ(raw.started_at);
@@ -724,7 +732,6 @@ export function createSync({ getToken, getHost, dataDir }) {
   // --- public API ----------------------------------------------------------
 
   let timer = null;
-  let persistTimer = null;
 
   return {
     events,
@@ -733,7 +740,7 @@ export function createSync({ getToken, getHost, dataDir }) {
       if (timer) return;
       syncOnce();
       timer = setInterval(syncOnce, SYNC_INTERVAL_MS);
-      persistTimer = setInterval(() => maybePersist(true), 60_000);
+      setInterval(() => maybePersist(true), 60_000);
       const flush = () => {
         persist();
         process.exit(0);
@@ -749,7 +756,7 @@ export function createSync({ getToken, getHost, dataDir }) {
     },
     /** Snapshot for /api/data: everything the client needs, filtered to scope. */
     snapshot({ start, end, agentId }) {
-      const inScope = (aid) => agentId === "all" || !agentId ? true : aid === agentId;
+      const inScope = (aid) => (agentId === "all" || !agentId ? true : aid === agentId);
 
       // Coverage: an agent that hasn't finished backfilling only vouches for
       // data back to the oldest row it has fetched — clip the window there.

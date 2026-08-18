@@ -30,11 +30,11 @@ export default function RiskTab() {
     return (
       <EmptyState title="No risk-scored spans in this window">
         <p>
-          Prefactor computes risk <em>on read</em>, and only for agents with a risk profile assigned. Spans from agents without one come
-          back unscored.
+          Prefactor computes risk <em>on read</em>, and only for agents with a risk profile assigned. Spans from agents without one come back
+          unscored.
         </p>
         <p>
-          Assign a profile with <code>{"PUT /api/v1/agent/{id} {\"details\":{\"risk_profile_id\":\"…\"}}"}</code>
+          Assign a profile with <code>{'PUT /api/v1/agent/{id} {"details":{"risk_profile_id":"…"}}'}</code>
           {riskProfiles.length > 0 && (
             <>
               {" "}
@@ -64,8 +64,16 @@ export default function RiskTab() {
       )}
 
       <div className="tiles">
-        <StatCard label="Spans risk-scored" value={compact(summary.scoredSpans)} detail={`${pct(summary.coverage)} of ${compact(summary.totalSpans)} spans`} />
-        <StatCard label="High or critical" value={compact(summary.highPlus)} detail={summary.scoredSpans ? `${pct(summary.highPlus / summary.scoredSpans)} of scored` : undefined} />
+        <StatCard
+          label="Spans risk-scored"
+          value={compact(summary.scoredSpans)}
+          detail={`${pct(summary.coverage)} of ${compact(summary.totalSpans)} spans`}
+        />
+        <StatCard
+          label="High or critical"
+          value={compact(summary.highPlus)}
+          detail={summary.scoredSpans ? `${pct(summary.highPlus / summary.scoredSpans)} of scored` : undefined}
+        />
         <StatCard label="Max risk score" value={summary.maxScore == null ? "—" : String(summary.maxScore)} />
         <StatCard
           label="Sensitive-marked spans"
@@ -105,7 +113,8 @@ export default function RiskTab() {
                 strokeWidth={2}
                 maxBarSize={24}
                 radius={i === RISK_LEVELS.length - 1 ? [4, 4, 0, 0] : undefined}
-               isAnimationActive={false} />
+                isAnimationActive={false}
+              />
             ))}
           </BarChart>
         </ResponsiveContainer>
@@ -125,7 +134,14 @@ export default function RiskTab() {
           <ResponsiveContainer width="100%" height={Math.max(120, summary.bySchema.length * 34 + 30)}>
             <BarChart data={summary.bySchema} layout="vertical" margin={{ top: 4, right: 16, left: 4, bottom: 0 }}>
               <CartesianGrid horizontal={false} stroke={GRID_STROKE} />
-              <XAxis type="number" tick={AXIS_TICK} axisLine={AXIS_LINE} tickLine={false} allowDecimals={false} tickFormatter={(v: number) => compact(v)} />
+              <XAxis
+                type="number"
+                tick={AXIS_TICK}
+                axisLine={AXIS_LINE}
+                tickLine={false}
+                allowDecimals={false}
+                tickFormatter={(v: number) => compact(v)}
+              />
               <YAxis type="category" dataKey="schema" tick={AXIS_TICK} axisLine={false} tickLine={false} width={170} />
               <Tooltip cursor={{ fill: "var(--gridline)", opacity: 0.35 }} content={<VizTooltip format={compact} />} />
               {RISK_LEVELS.map((l, i) => (
@@ -138,7 +154,8 @@ export default function RiskTab() {
                   strokeWidth={2}
                   maxBarSize={18}
                   radius={i === RISK_LEVELS.length - 1 ? [0, 4, 4, 0] : undefined}
-                 isAnimationActive={false} />
+                  isAnimationActive={false}
+                />
               ))}
             </BarChart>
           </ResponsiveContainer>
@@ -155,7 +172,16 @@ export default function RiskTab() {
               <XAxis dataKey="bucket" tick={AXIS_TICK} axisLine={AXIS_LINE} tickLine={false} />
               <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} width={40} allowDecimals={false} tickFormatter={(v: number) => compact(v)} />
               <Tooltip cursor={{ fill: "var(--gridline)", opacity: 0.35 }} content={<VizTooltip format={compact} />} />
-              <Bar dataKey="count" name="spans" fill="var(--accent)" stroke="var(--surface-1)" strokeWidth={2} maxBarSize={24} radius={[4, 4, 0, 0]}  isAnimationActive={false} />
+              <Bar
+                dataKey="count"
+                name="spans"
+                fill="var(--accent)"
+                stroke="var(--surface-1)"
+                strokeWidth={2}
+                maxBarSize={24}
+                radius={[4, 4, 0, 0]}
+                isAnimationActive={false}
+              />
             </BarChart>
           </ResponsiveContainer>
         </ChartCard>
@@ -239,14 +265,13 @@ export default function RiskTab() {
             <p>
               {summary.sensitive.spansEncoded > 0 ? (
                 <>
-                  Those spans are flagged <code>sensitive_encoding</code>: the content was encoded before it reached the API, so the
-                  category labels aren't exposed to read back. Declare <code>data_risk</code> categories on the span's schema to see a
-                  breakdown here.
+                  Those spans are flagged <code>sensitive_encoding</code>: the content was encoded before it reached the API, so the category labels
+                  aren't exposed to read back. Declare <code>data_risk</code> categories on the span's schema to see a breakdown here.
                 </>
               ) : (
                 <>
-                  Values wrapped with the SDK's sensitive markers (e.g. <code>personal_identifiers</code>, <code>financial</code>) are
-                  counted here by label. Payload contents themselves are never displayed.
+                  Values wrapped with the SDK's sensitive markers (e.g. <code>personal_identifiers</code>, <code>financial</code>) are counted here by
+                  label. Payload contents themselves are never displayed.
                 </>
               )}
             </p>
@@ -261,8 +286,8 @@ export default function RiskTab() {
 
       <div className="notice">
         <span>
-          Instance-level risk rollups are unreliable on the API today — everything above is computed per-span. Span payload contents are
-          never rendered here; only schema names, levels, scores, and sensitivity labels.
+          Instance-level risk rollups are unreliable on the API today — everything above is computed per-span. Span payload contents are never
+          rendered here; only schema names, levels, scores, and sensitivity labels.
         </span>
       </div>
     </div>

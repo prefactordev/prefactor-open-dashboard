@@ -36,7 +36,7 @@ export interface ActionsSummary {
   /** actions / total spans (null when there are no spans). */
   rate: number | null;
   byKind: Record<ActionKind, number>;
-  byDay: Array<{ day: string } & Record<ActionKind, number> & { day: string }>;
+  byDay: Array<{ day: string } & Record<ActionKind, number>>;
   /** Most recent killswitch events, newest first. */
   recentKills: Array<{ instanceId: string; agentId: string; reason: string; when: string | null }>;
 }

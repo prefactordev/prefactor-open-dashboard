@@ -108,7 +108,7 @@ function AdminPanel(props: { host: string; tokenSet: boolean; fromEnv: boolean; 
         if (e.key === "Escape" && !busy) props.onClose();
       }}
     >
-      <form className="card modal" role="dialog" aria-modal="true" aria-labelledby="admin-title" onSubmit={submit}>
+      <form className="card modal" role="dialog" aria-modal="true" aria-labelledby="admin-title" onSubmit={(e) => void submit(e)}>
         <div className="card-head">
           <h3 id="admin-title">Admin — API connection</h3>
           <span className="toggle">
@@ -118,15 +118,14 @@ function AdminPanel(props: { host: string; tokenSet: boolean; fromEnv: boolean; 
           </span>
         </div>
         <p className="modal-note">
-          Paste your Prefactor <strong>admin API token</strong> (a JWT — not the <code>pf_…</code> SDK ingestion key). It's validated
-          against the API, then saved by the local server so it survives restarts. It never leaves this machine and can't be read back
-          from the browser.
+          Paste your Prefactor <strong>admin API token</strong> (a JWT — not the <code>pf_…</code> SDK ingestion key). It's validated against the API,
+          then saved by the local server so it survives restarts. It never leaves this machine and can't be read back from the browser.
         </p>
         {props.fromEnv && (
           <div className="notice" style={{ marginBottom: 12 }}>
             <span>
-              A token is set via the <code>PREFACTOR_API_TOKEN</code> environment variable. A token saved here applies immediately,
-              but the environment variable wins again on restart — unset it to make a change here permanent.
+              A token is set via the <code>PREFACTOR_API_TOKEN</code> environment variable. A token saved here applies immediately, but the
+              environment variable wins again on restart — unset it to make a change here permanent.
             </span>
           </div>
         )}
@@ -281,20 +280,22 @@ function Shell() {
           shorter range than the one selected. */}
       {d.spansTruncated && (
         <div className={d.horizonLimited && !d.backfilling ? "notice warn" : "notice"}>
-          <strong>{d.backfilling ? "Fetching older history…" : d.horizonLimited ? "Beyond the fetch horizon" : "Showing history available so far"}</strong>
+          <strong>
+            {d.backfilling ? "Fetching older history…" : d.horizonLimited ? "Beyond the fetch horizon" : "Showing history available so far"}
+          </strong>
           <span>
             You asked for {RANGES.find((r) => r.key === d.range)?.label ?? "this range"}; charts below cover{" "}
             <strong>{fmtWhen(d.windowStart)} → now</strong>.{" "}
             {d.backfilling ? (
               <>
-                The rest is downloading in the background — on a busy account this can take several minutes. Charts extend automatically
-                as it arrives, so there's no need to reload, and once fetched this range loads instantly, including after a restart.
-                Cached so far: {compact(d.cachedSpans)} spans.
+                The rest is downloading in the background — on a busy account this can take several minutes. Charts extend automatically as it
+                arrives, so there's no need to reload, and once fetched this range loads instantly, including after a restart. Cached so far:{" "}
+                {compact(d.cachedSpans)} spans.
               </>
             ) : d.horizonLimited ? (
               <>
-                History is only fetched back {d.horizonDays} days. To go further, raise <code>BACKFILL_HORIZON_DAYS</code> and restart —
-                the extra history downloads once, then stays cached.
+                History is only fetched back {d.horizonDays} days. To go further, raise <code>BACKFILL_HORIZON_DAYS</code> and restart — the extra
+                history downloads once, then stays cached.
               </>
             ) : (
               <>Older data isn't cached for this scope yet.</>
@@ -325,8 +326,8 @@ function Shell() {
           <div className="empty">
             <h4>Your API token was rejected</h4>
             <p>
-              The Prefactor API returned <strong>401 Unauthorized</strong>. The token may have expired, been revoked, or belong to a
-              different host — and an SDK ingestion key (<code>pf_…</code>) can't read data back.
+              The Prefactor API returned <strong>401 Unauthorized</strong>. The token may have expired, been revoked, or belong to a different host —
+              and an SDK ingestion key (<code>pf_…</code>) can't read data back.
             </p>
             <p>Paste a current admin token to continue; everything else is already set up.</p>
             <button className="primary" style={{ marginTop: 4 }} onClick={() => setAdmin((a) => ({ ...a, open: true }))}>
@@ -339,8 +340,8 @@ function Shell() {
           <div className="empty">
             <h4>Connect your Prefactor account</h4>
             <p>
-              Add your admin API token to start watching your agents. Open <strong>⚙ Admin</strong> (top right), paste the token, and the
-              dashboard fills in automatically.
+              Add your admin API token to start watching your agents. Open <strong>⚙ Admin</strong> (top right), paste the token, and the dashboard
+              fills in automatically.
             </p>
             <p>
               Find it in the Prefactor app under <em>Account → API Tokens</em>. It stays on this machine — the browser never sees it.

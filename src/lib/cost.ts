@@ -65,8 +65,11 @@ export function extractLlmCalls(spans: Span[]): LlmCall[] {
     const completionTokens = num(getPath(s, "payload.token_usage.completion_tokens"));
     const totalTokens = num(getPath(s, "payload.token_usage.total_tokens")) || promptTokens + completionTokens;
     // Model path differs by SDK family: ai-sdk nests it under inputs.ai,
-    // the Anthropic SDKs write inputs.model directly.
-    const model = String(getPath(s, "payload.inputs.ai.model.id") ?? getPath(s, "payload.inputs.model") ?? "unknown");
+    // the Anthropic SDKs write inputs.model directly. Narrowed to string, not
+    // String()-coerced: an object at either path would otherwise become the
+    // model name "[object Object]".
+    const modelRaw = getPath(s, "payload.inputs.ai.model.id") ?? getPath(s, "payload.inputs.model");
+    const model = typeof modelRaw === "string" && modelRaw !== "" ? modelRaw : "unknown";
     const price = PRICES[model];
     // Finish reason takes several shapes: ai-sdk writes either a string or
     // {unified, raw}, Anthropic writes stop_reason. Failed calls carry
@@ -78,8 +81,7 @@ export function extractLlmCalls(spans: Span[]): LlmCall[] {
     const finish =
       typeof finishRaw === "string"
         ? finishRaw
-        : ((finishRaw as { unified?: unknown; raw?: unknown } | null)?.unified ??
-          (finishRaw as { unified?: unknown; raw?: unknown } | null)?.raw);
+        : ((finishRaw as { unified?: unknown; raw?: unknown } | null)?.unified ?? (finishRaw as { unified?: unknown; raw?: unknown } | null)?.raw);
     const errType = getPath(s, "payload.error.error_type");
     calls.push({
       spanId: s.id,
@@ -134,7 +136,16 @@ export interface CostSummary {
 export function summarizeCost(calls: LlmCall[], windowStart: string, windowEnd: string): CostSummary {
   const models = new Map<
     string,
-    { cost: number; tokens: number; calls: number; priced: boolean; promptTokens: number; completionTokens: number; durations: number[]; errors: number }
+    {
+      cost: number;
+      tokens: number;
+      calls: number;
+      priced: boolean;
+      promptTokens: number;
+      completionTokens: number;
+      durations: number[];
+      errors: number;
+    }
   >();
   const agents = new Map<string, { cost: number; tokens: number; calls: number }>();
   const instances = new Map<string, { agentId: string | null; cost: number; tokens: number; calls: number; startedAt: string | null }>();
@@ -150,7 +161,16 @@ export function summarizeCost(calls: LlmCall[], windowStart: string, windowEnd: 
     promptTokens += c.promptTokens;
     completionTokens += c.completionTokens;
 
-    const m = models.get(c.model) ?? { cost: 0, tokens: 0, calls: 0, priced: c.priced, promptTokens: 0, completionTokens: 0, durations: [], errors: 0 };
+    const m = models.get(c.model) ?? {
+      cost: 0,
+      tokens: 0,
+      calls: 0,
+      priced: c.priced,
+      promptTokens: 0,
+      completionTokens: 0,
+      durations: [],
+      errors: 0,
+    };
     m.cost += c.cost;
     m.tokens += c.totalTokens;
     m.calls++;
@@ -221,7 +241,10 @@ export function summarizeCost(calls: LlmCall[], windowStart: string, windowEnd: 
     };
   });
   const latencyByDay = allDays.map((day) => {
-    const durs = (callsByDay.get(day) ?? []).map((c) => c.durationMs).filter((d): d is number => d != null).sort((a, b) => a - b);
+    const durs = (callsByDay.get(day) ?? [])
+      .map((c) => c.durationMs)
+      .filter((d): d is number => d != null)
+      .sort((a, b) => a - b);
     return { day, p50: percentile(durs, 50), p95: percentile(durs, 95) };
   });
 

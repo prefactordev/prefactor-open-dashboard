@@ -1,0 +1,17 @@
+# Weekly dependency PRs, grouped so routine bumps arrive as one reviewable PR
+# instead of ten. Security updates still arrive individually and immediately.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      dev-dependencies:
+        dependency-type: development
+      production-dependencies:
+        dependency-type: production
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

@@ -1,0 +1,97 @@
+# CI: every push and PR runs the same gate contributors run locally with
+# `npm run verify` — lint, typecheck, tests (unit + API regression), build.
+# The test matrix pins the oldest supported Node (from package.json engines)
+# and current LTS lines, so "works on my machine" can't drift from the floor.
+
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint & format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
+
+  test:
+    name: Test (Node ${{ matrix.node }} on ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [20, 22]
+        os: [ubuntu-latest]
+        include:
+          # The oldest engine we claim to support, and the platform most
+          # contributors' laptops actually run.
+          - node: 18.17.0
+            os: ubuntu-latest
+          - node: 22
+            os: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      # The API regression suite boots the built server, so build first.
+      - run: npm run build
+      # One cell enforces the coverage thresholds (vitest.config.ts); the rest
+      # run the plain suite — coverage numbers don't vary by OS or Node line.
+      - run: npm test
+        if: ${{ !(matrix.node == 22 && matrix.os == 'ubuntu-latest') }}
+      - run: npm run test:coverage
+        if: ${{ matrix.node == 22 && matrix.os == 'ubuntu-latest' }}
+
+  e2e:
+    name: Browser smoke (Playwright)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      # Playwright boots demo mode itself (playwright.config.ts webServer).
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-traces
+          path: test-results/
+          retention-days: 7
+
+  docker:
+    name: Docker image builds
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      # Build only — publishing happens in docker-publish.yml on release.
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false

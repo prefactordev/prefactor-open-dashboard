@@ -30,8 +30,8 @@ export default function QualityExternalTab() {
           <code>{'PUT /api/v1/agent_instance/{id} {"details":{"quality_payload":{…}}}'}</code> — no schema declaration required.
         </p>
         <p>
-          The PUT <em>replaces</em> the whole payload, so merge under your own namespaced key (read the current payload first) to avoid
-          clobbering scores other tools wrote.
+          The PUT <em>replaces</em> the whole payload, so merge under your own namespaced key (read the current payload first) to avoid clobbering
+          scores other tools wrote.
         </p>
         {detailCapped && <p>Quality details are read newest-first in the background; older runs fill in as the sync catches up.</p>}
       </EmptyState>
@@ -52,8 +52,8 @@ export default function QualityExternalTab() {
       {detailCapped && (
         <div className="notice">
           <span>
-            Quality details are read newest-first in the background — {summary.finished} of the window's runs checked so far; older runs
-            fill in as the sync catches up.
+            Quality details are read newest-first in the background — {summary.finished} of the window's runs checked so far; older runs fill in as
+            the sync catches up.
           </span>
         </div>
       )}
@@ -113,7 +113,8 @@ export default function QualityExternalTab() {
                     connectNulls
                     dot={{ r: 4, fill: seriesColor(0, dark), stroke: "var(--surface-1)", strokeWidth: 2 }}
                     activeDot={{ r: 5 }}
-                   isAnimationActive={false} />
+                    isAnimationActive={false}
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </>
@@ -151,7 +152,10 @@ export default function QualityExternalTab() {
         </ChartCard>
       </div>
 
-      <ChartCard title="Recent scored runs" sub={columns.length < summary.fields.length ? `showing ${columns.length} of ${summary.fields.length} fields` : undefined}>
+      <ChartCard
+        title="Recent scored runs"
+        sub={columns.length < summary.fields.length ? `showing ${columns.length} of ${summary.fields.length} fields` : undefined}
+      >
         <div className="table-scroll">
           <table className="viz">
             <thead>

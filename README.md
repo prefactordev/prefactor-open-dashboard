@@ -1,5 +1,9 @@
 # Prefactor Open Dashboard
 
+[![CI](https://github.com/prefactordev/prefactor-open-dashboard/actions/workflows/ci.yml/badge.svg)](https://github.com/prefactordev/prefactor-open-dashboard/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Node >= 18.17](https://img.shields.io/badge/node-%3E%3D18.17-brightgreen)](package.json)
+
 A local, open-source dashboard for your [Prefactor](https://prefactor.tech) agent telemetry — risk, quality, and cost across every agent in your account, computed from your own raw spans. Runs on your machine, updates live, and your API token never leaves it.
 
 ![The Quality tab, showing run outcomes, feedback, an activity heatmap and oversight actions](docs/tabs.png)
@@ -15,17 +19,25 @@ npm install
 npm start
 ```
 
-Then open **http://localhost:8788**. The dashboard opens an **Admin** panel asking for your Prefactor API token — paste it, click *Save & connect*, and data starts filling in within seconds.
+Then open **http://localhost:8788**. The dashboard opens an **Admin** panel asking for your Prefactor API token — paste it, click _Save & connect_, and data starts filling in within seconds.
 
 That's it. `npm start` builds the app the first time and serves it; later starts skip the build.
 
 > No git? Download the repository as a ZIP, unzip it, then run `npm install && npm start` in the folder.
 
+### Try it without an account
+
+```bash
+npm run demo
+```
+
+Boots the dashboard against a **synthetic Prefactor API** (`scripts/mock-upstream.mjs`) with three agents and two weeks of realistic data — LLM calls with token usage, risk scores, sensitive-data labels, killswitch events, HITL approvals, human feedback, and eval scores. Every tab lights up; nothing leaves your machine; no token needed. It's the same synthetic upstream the API regression tests run against.
+
 ### Getting your API token
 
 In the Prefactor app: **Account → API Tokens**. Create an admin/session token — a long `eyJ…` JWT.
 
-This is *not* the `pf_…` SDK ingestion key your agents use to send data; that one can't read it back. If you paste the wrong one, the Admin panel validates it against the API and tells you immediately rather than failing silently later.
+This is _not_ the `pf_…` SDK ingestion key your agents use to send data; that one can't read it back. If you paste the wrong one, the Admin panel validates it against the API and tells you immediately rather than failing silently later.
 
 The token is stored only by the local server (in `DATA_DIR/config.json`, mirrored to `.env` when writable) and is **write-only from the browser's side**: no endpoint ever returns it, so screen-sharing the dashboard can't leak it. The server also binds to `127.0.0.1`, so nothing on your network can reach it.
 
@@ -35,18 +47,26 @@ To point the dashboard at a different Prefactor account, open **⚙ Admin** and 
 
 Four tabs, all scoped by the shared time-range and agent filters at the top, so every number on screen agrees.
 
-| Tab | What it shows | Where it comes from |
-|---|---|---|
-| **Risk** | Risk-scored spans over time, risk by span type, score distribution, riskiest spans, sensitive-data exposure, open alerts | Prefactor scores risk *on read* for agents that have a risk profile assigned |
-| **Quality · Prefactor** | Run outcomes and success rate, duration percentiles, per-span-type timings, user thumbs feedback, activity mix and heatmap, rendered quality summaries | Signals the platform computes or renders itself |
-| **Quality · Your evals** | Score coverage, auto-discovered score fields with daily trends, recent scored runs | `quality_payload` — the JSON *your* instrumentation or eval tooling attaches to runs |
-| **Cost** | Estimated spend, tokens in/out, cost by model over time, model economics, latency, finish reasons, top runs by cost | Token usage on LLM spans × the per-model price table in `src/lib/cost.ts` |
+| Tab                      | What it shows                                                                                                                                          | Where it comes from                                                                  |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
+| **Risk**                 | Risk-scored spans over time, risk by span type, score distribution, riskiest spans, sensitive-data exposure, open alerts                               | Prefactor scores risk _on read_ for agents that have a risk profile assigned         |
+| **Quality · Prefactor**  | Run outcomes and success rate, duration percentiles, per-span-type timings, user thumbs feedback, activity mix and heatmap, rendered quality summaries | Signals the platform computes or renders itself                                      |
+| **Quality · Your evals** | Score coverage, auto-discovered score fields with daily trends, recent scored runs                                                                     | `quality_payload` — the JSON _your_ instrumentation or eval tooling attaches to runs |
+| **Cost**                 | Estimated spend, tokens in/out, cost by model over time, model economics, latency, finish reasons, top runs by cost                                    | Token usage on LLM spans × the per-model price table in `src/lib/cost.ts`            |
 
 The quality split is by **who created the signal**: Prefactor renders `quality_summary` and captures thumbs feedback; `quality_payload` is always written by your own code. Every tab that finds no data explains exactly how to light it up rather than showing an empty chart.
 
+|                      Risk                      |                   Cost                   |
+| :--------------------------------------------: | :--------------------------------------: |
+|         ![Risk tab](docs/tab-risk.png)         |      ![Cost tab](docs/tab-cost.png)      |
+|            **Quality · Prefactor**             |         **Quality · Your evals**         |
+| ![Quality tab](docs/tab-quality-prefactor.png) | ![Evals tab](docs/tab-quality-evals.png) |
+
+<sub>Screenshots are captured from `npm run demo` (synthetic data) by `npm run shots`, so they always match what the current code renders.</sub>
+
 ## Actions taken — what counts, and how to make each show up
 
-The Risk and Quality tabs share an **Actions taken** tile (actions ÷ total spans) and an **Actions taken over time** chart. An *action* is an intervention on a run — a human or system stepping in — not the agent's own activity, and not bookkeeping about it. Three kinds are counted, each from a specific signal:
+The Risk and Quality tabs share an **Actions taken** tile (actions ÷ total spans) and an **Actions taken over time** chart. An _action_ is an intervention on a run — a human or system stepping in — not the agent's own activity, and not bookkeeping about it. Three kinds are counted, each from a specific signal:
 
 ### 1. Killswitch (terminated runs)
 
@@ -76,25 +96,24 @@ Instrument your approval flow (e.g. Prefactor's Slack approve/deny) as its own s
 
 Segments, not substrings: `ai-sdk:tool:approve_refund` is deliberately excluded, as is any schema with a `tool` segment. That is the agent asking for a human, not a human intervening.
 
-
-**Not counted as actions:** quality-evaluation records. They carry no rating and no approval segment, so neither detector fires — eval scores belong on the *Quality · Your evals* tab, not here.
+**Not counted as actions:** quality-evaluation records. They carry no rating and no approval segment, so neither detector fires — eval scores belong on the _Quality · Your evals_ tab, not here.
 
 ## Configuration
 
 Everything is optional except the token, and the token is easiest to set from the Admin panel. To use a file instead, copy `.env.example` to `.env`:
 
-| Variable | Default | What it does |
-|---|---|---|
-| `PREFACTOR_API_TOKEN` | — | Your admin API token (or set it in the Admin panel) |
-| `PREFACTOR_API_HOST` | `https://app.prefactorai.com` | Platform API host |
-| `PORT` | `8788` | Port to serve on |
-| `DATA_DIR` | `./data` | Where the cache and saved token live — point this at a persistent volume when hosting |
-| `SYNC_INTERVAL_MS` | `15000` | Poll cadence — the ceiling on how "live" the dashboard is |
-| `BACKFILL_HORIZON_DAYS` | `90` | How far back history is fetched — and kept: rows older than this are evicted, which is what bounds memory |
-| `MAX_CACHE_SPANS_PER_AGENT` | `60000` | Stops backfill early on very large agents |
-| `BIND_HOST` | `127.0.0.1` | Interface to bind. Anything but loopback requires `DASHBOARD_PASSWORD` |
-| `DASHBOARD_PASSWORD` | — | Require a password (HTTP Basic) to open the dashboard |
-| `ALLOWED_HOSTS` | — | Comma-separated hostnames to accept when hosted (e.g. `dash.example.com`). localhost is always allowed |
+| Variable                    | Default                       | What it does                                                                                              |
+| --------------------------- | ----------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `PREFACTOR_API_TOKEN`       | —                             | Your admin API token (or set it in the Admin panel)                                                       |
+| `PREFACTOR_API_HOST`        | `https://app.prefactorai.com` | Platform API host                                                                                         |
+| `PORT`                      | `8788`                        | Port to serve on                                                                                          |
+| `DATA_DIR`                  | `./data`                      | Where the cache and saved token live — point this at a persistent volume when hosting                     |
+| `SYNC_INTERVAL_MS`          | `15000`                       | Poll cadence — the ceiling on how "live" the dashboard is                                                 |
+| `BACKFILL_HORIZON_DAYS`     | `90`                          | How far back history is fetched — and kept: rows older than this are evicted, which is what bounds memory |
+| `MAX_CACHE_SPANS_PER_AGENT` | `60000`                       | Stops backfill early on very large agents                                                                 |
+| `BIND_HOST`                 | `127.0.0.1`                   | Interface to bind. Anything but loopback requires `DASHBOARD_PASSWORD`                                    |
+| `DASHBOARD_PASSWORD`        | —                             | Require a password (HTTP Basic) to open the dashboard                                                     |
+| `ALLOWED_HOSTS`             | —                             | Comma-separated hostnames to accept when hosted (e.g. `dash.example.com`). localhost is always allowed    |
 
 ### Your token is remembered
 
@@ -124,13 +143,27 @@ Without a persistent `DATA_DIR`, every restart re-backfills from scratch — cor
 
 The sync is a single background worker, so run **one** instance. Several instances against one account multiply upstream load for no benefit.
 
+### Docker
+
+The included `Dockerfile` builds a minimal image (no `node_modules` at runtime — the server is zero-dependency):
+
+```bash
+docker build -t prefactor-open-dashboard .
+docker run -p 8788:8788 -v pfdash-data:/data \
+  -e DASHBOARD_PASSWORD=change-me \
+  -e PREFACTOR_API_TOKEN=eyJ... \
+  prefactor-open-dashboard
+```
+
+The password is required — the image binds `0.0.0.0` inside the container, and the server refuses to start exposed without one. The `/data` volume is where the cache and saved token live.
+
 Price table: edit `PRICES` in `src/lib/cost.ts` to match the models you run. A model with no entry contributes $0 to cost and is flagged in the UI rather than silently ignored.
 
 ## Troubleshooting
 
 **"Port 8788 is already in use"** — another copy is probably running; open http://localhost:8788. Otherwise start on another port: `PORT=8790 npm start` (PowerShell: `$env:PORT=8790; npm start` · cmd: `set PORT=8790 && npm start`).
 
-**The Admin panel rejects my token** — you likely pasted the SDK ingestion key (`pf_…`) instead of an admin/session token (`eyJ…`). See *Getting your API token* above.
+**The Admin panel rejects my token** — you likely pasted the SDK ingestion key (`pf_…`) instead of an admin/session token (`eyJ…`). See _Getting your API token_ above.
 
 **Charts are empty but the token works** — check the time range (default is 7 days) and the agent filter. Each tab's empty state names the exact signal it needs; a brand-new account with no agent runs will legitimately show nothing.
 
@@ -161,23 +194,23 @@ Prefactor Platform API
 ```
 
 - **Background sync** pages each agent newest-first. After the initial backfill a poll costs two pages per active agent (spans + runs) plus up to 30 quality-detail reads — it stops at the first span it has already seen. Idle agents back off to a ~2-minute cadence.
-- **Projection**: only the fields the dashboard reads are cached (~200 bytes per span, not ~3.5KB) — raw *span* payloads never touch disk. Instance `quality_payload`/`quality_summary` are cached in full, since that's the data the evals tab exists to show; the cache file is written mode 0600.
+- **Projection**: only the fields the dashboard reads are cached (~200 bytes per span, not ~3.5KB) — raw _span_ payloads never touch disk. Instance `quality_payload`/`quality_summary` are cached in full, since that's the data the evals tab exists to show; the cache file is written mode 0600.
 - **Live**: the browser holds an SSE connection; when a sync round lands new data, every chart refreshes. No polling from the browser, no manual reload.
 
 What you should see, measured against an account with an ~80k-spans/week agent:
 
-| Moment | Expected |
-|---|---|
-| Page load, tab switch, range change | **~1–2s**, from the local cache |
-| A new span reaching the screen | **~15–20s** for an active agent (one sync interval, pushed over SSE); up to ~2 min for an agent that has been idle, which polls less often |
-| First-ever backfill | Bounded by the API (~2s per 100-span page). Runs in the background; partial data shows immediately and the covered window visibly extends |
-| Server restart | **Instant** — the cache persists, written within ~5s of data arriving (~30s once the cache passes 50k spans). A clean stop flushes; only a hard kill loses anything |
+| Moment                              | Expected                                                                                                                                                            |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Page load, tab switch, range change | **~1–2s**, from the local cache                                                                                                                                     |
+| A new span reaching the screen      | **~15–20s** for an active agent (one sync interval, pushed over SSE); up to ~2 min for an agent that has been idle, which polls less often                          |
+| First-ever backfill                 | Bounded by the API (~2s per 100-span page). Runs in the background; partial data shows immediately and the covered window visibly extends                           |
+| Server restart                      | **Instant** — the cache persists, written within ~5s of data arriving (~30s once the cache passes 50k spans). A clean stop flushes; only a hard kill loses anything |
 
 **Reaching further back costs time, once.** Selecting a longer range than the cache covers shows a banner saying what's covered so far and that the rest is downloading — the charts extend themselves as it lands, with no reload. After that, the same range is instant forever, including across restarts. If the range is short because of `BACKFILL_HORIZON_DAYS` rather than because it's still loading, the banner says that instead and names the setting to change.
 
 Two upstream facts the design is built around, worth knowing before "optimizing":
 
-1. **The spans endpoint degrades sharply under parallelism.** ~6 concurrent requests is its sweet spot; at ~18 concurrent, page latency goes from ~2s to 20s+ (measured). All upstream traffic flows through a 6-request semaphore with hard timeouts. Raising it makes backfill *slower* and degrades the API for everything else using it.
+1. **The spans endpoint degrades sharply under parallelism.** ~6 concurrent requests is its sweet spot; at ~18 concurrent, page latency goes from ~2s to 20s+ (measured). All upstream traffic flows through a 6-request semaphore with hard timeouts. Raising it makes backfill _slower_ and degrades the API for everything else using it.
 2. **Max page size is 100 and there is no bulk export**, so a large history simply costs many requests. The sync pays that cost once per machine.
 
 Other honest notes: **cost is derived, not stored** (tokens × your price table); **instance rollups from the API are unreliable** (`span_counts`, `cost_breakdown` come back empty even on runs with spans), so every metric is computed from spans themselves; **quality details are read per run**, newest-first, so on a big account the newest runs are scored first and older ones fill in as the sync catches up.
@@ -186,12 +219,21 @@ Other honest notes: **cost is derived, not stored** (tokens × your price table)
 
 ```bash
 npm run dev        # Vite dev server (localhost:5173) + API server, live reload
+npm run demo       # full dashboard on synthetic data — no account needed
+npm run verify     # everything CI runs: lint + typecheck + tests + build
+npm test           # the test suite alone (unit + sync engine + API regression)
+npm run test:e2e   # Playwright browser smoke — boots demo mode itself
+npm run shots      # regenerate the README screenshots from demo mode
 npm run typecheck  # tsc --noEmit
 npm run build      # typecheck + production build into dist/
 npm run server     # API/sync server only, without the auto-build step
 ```
 
 Layout: `src/lib/*.ts` is pure aggregation over the cached snapshot (easy to test and to extend); `src/tabs/*` is one file per tab; `server/sync.mjs` owns all platform-API traffic; `src/palette.ts` + `src/styles.css` hold brand tokens and a series palette whose ORDER is the colorblind-safety mechanism (adjacent pairs are separated in both light and dark). If you change the hues, verify adjacent-pair separation rather than picking by eye.
+
+Tests live in `tests/` and `e2e/`: pure-function unit tests for every metric library, in-process regression tests for the sync engine and its projection (`tests/sync.test.mjs`), black-box HTTP tests of the whole server (`tests/api.test.mjs`) — auth, host-header guard, gzip, path traversal, and the exact `/api/*` response shapes — and a Playwright smoke suite (`e2e/`) that renders every tab in a real browser against demo mode. CI enforces coverage thresholds on the metric libraries and sync engine. See [CONTRIBUTING.md](CONTRIBUTING.md) for what your change needs.
+
+Releases are automated: [release-please](https://github.com/googleapis/release-please) maintains a release PR from conventional commits (`fix:` → patch, `feat:` → minor); merging it tags a release, which publishes the Docker image to `ghcr.io` for `linux/amd64` and `linux/arm64`.
 
 ## License
 

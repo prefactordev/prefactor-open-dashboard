@@ -18,13 +18,21 @@ export interface RiskSummary {
   highPlus: number; // high + critical
   maxScore: number | null;
   /** One row per UTC day with a count per level. */
-  byDay: Array<{ day: string } & Record<RiskLevel, number> & { day: string }>;
+  byDay: Array<{ day: string } & Record<RiskLevel, number>>;
   /** Riskiest spans, score desc. */
-  top: Array<{ spanId: string; agentId: string | null; instanceId: string | null; name: string; level: string; score: number; startedAt: string | null }>;
+  top: Array<{
+    spanId: string;
+    agentId: string | null;
+    instanceId: string | null;
+    name: string;
+    level: string;
+    score: number;
+    startedAt: string | null;
+  }>;
   /** Agents that produced spans but no risk scores (likely missing a risk profile). */
   unscoredAgents: string[];
   /** Per span type, count at each level — which activities carry the risk. */
-  bySchema: Array<{ schema: string } & Record<RiskLevel, number> & { schema: string; total: number }>;
+  bySchema: Array<{ schema: string; total: number } & Record<RiskLevel, number>>;
   /** Risk score histogram, ten-point buckets 0-9 … 90+. */
   scoreHistogram: Array<{ bucket: string; count: number }>;
   /**
@@ -70,7 +78,7 @@ export function summarizeRisk(spans: Span[], windowStart: string, windowEnd: str
     // Sensitive markers are independent of risk scoring. The server's
     // projection precomputes labels; fall back to scanning raw payloads for
     // spans that arrived without it.
-    let marked = false;
+    let marked: boolean;
     if (Array.isArray(s.sensitive_labels) && s.sensitive_labels.length > 0) {
       marked = true;
       for (const l of s.sensitive_labels) sensitiveLabels.set(l, (sensitiveLabels.get(l) ?? 0) + 1);

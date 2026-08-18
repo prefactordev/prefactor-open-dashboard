@@ -66,10 +66,13 @@ const stored = loadStoredConfig();
 // from the UI by accident.
 const setting = (k) => process.env[k] ?? stored[k] ?? fileEnv[k];
 
+// `||`, not `??`: an env var set to the empty string (common in CI and
+// container templates) must mean "unset", or PORT="" binds port 0 and
+// BIND_HOST="" trips the exposure refusal below.
 let TOKEN = setting("PREFACTOR_API_TOKEN") || null;
-let HOST = (setting("PREFACTOR_API_HOST") ?? "https://app.prefactorai.com").replace(/\/+$/, "");
-const PORT = Number(env("PORT") ?? 8788);
-const BIND_HOST = env("BIND_HOST") ?? "127.0.0.1";
+let HOST = (setting("PREFACTOR_API_HOST") || "https://app.prefactorai.com").replace(/\/+$/, "");
+const PORT = Number(env("PORT") || 8788);
+const BIND_HOST = env("BIND_HOST") || "127.0.0.1";
 const PASSWORD = env("DASHBOARD_PASSWORD") || null;
 const TOKEN_FROM_ENV = Boolean(process.env.PREFACTOR_API_TOKEN);
 
@@ -287,7 +290,11 @@ async function handleConfig(req, res) {
     });
     if (!check.ok) {
       res.writeHead(400, { "content-type": "application/json" });
-      res.end(JSON.stringify({ error: `Token rejected by ${newHost} (HTTP ${check.status}). Paste the admin API token (a JWT), not the pf_… ingestion key.` }));
+      res.end(
+        JSON.stringify({
+          error: `Token rejected by ${newHost} (HTTP ${check.status}). Paste the admin API token (a JWT), not the pf_… ingestion key.`,
+        }),
+      );
       return;
     }
 

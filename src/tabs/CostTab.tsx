@@ -21,8 +21,8 @@ export default function CostTab() {
     return (
       <EmptyState title="No token usage in this window">
         <p>
-          Cost is computed from spans that carry <code>payload.token_usage</code> — the SDK records these on LLM calls automatically. Widen
-          the time range, or check that your agents are emitting llm spans.
+          Cost is computed from spans that carry <code>payload.token_usage</code> — the SDK records these on LLM calls automatically. Widen the time
+          range, or check that your agents are emitting llm spans.
         </p>
       </EmptyState>
     );
@@ -46,7 +46,9 @@ export default function CostTab() {
 
   const donutData = [
     ...namedModels.map((m) => ({ name: m, value: summary.models.find((x) => x.model === m)?.cost ?? 0 })),
-    ...(otherModels.length ? [{ name: "Other", value: otherModels.reduce((a, m) => a + (summary.models.find((x) => x.model === m)?.cost ?? 0), 0) }] : []),
+    ...(otherModels.length
+      ? [{ name: "Other", value: otherModels.reduce((a, m) => a + (summary.models.find((x) => x.model === m)?.cost ?? 0), 0) }]
+      : []),
   ].filter((d) => d.value > 0);
 
   const legendItems = stackKeys.map((m) => ({ label: m, color: m === "Other" ? (dark ? OTHER_DARK : OTHER_LIGHT) : modelColor(m) }));
@@ -57,8 +59,8 @@ export default function CostTab() {
         <div className="notice warn">
           <strong>Cost is understated:</strong>
           <span>
-            {compact(summary.unpricedTokens)} tokens ({pct(summary.totalTokens ? summary.unpricedTokens / summary.totalTokens : null)} of
-            all tokens, {compact(summary.unpricedCalls)} calls) are priced at $0 —{" "}
+            {compact(summary.unpricedTokens)} tokens ({pct(summary.totalTokens ? summary.unpricedTokens / summary.totalTokens : null)} of all tokens,{" "}
+            {compact(summary.unpricedCalls)} calls) are priced at $0 —{" "}
             {summary.unpricedModels.includes("unknown") && (
               <>
                 some spans carry token usage but no model id, so their model can't be identified
@@ -67,8 +69,8 @@ export default function CostTab() {
             )}
             {summary.unpricedModels.filter((m) => m !== "unknown").length > 0 && (
               <>
-                no rate is configured for {summary.unpricedModels.filter((m) => m !== "unknown").join(", ")} — add them to{" "}
-                <code>PRICES</code> in <code>src/lib/cost.ts</code>.
+                no rate is configured for {summary.unpricedModels.filter((m) => m !== "unknown").join(", ")} — add them to <code>PRICES</code> in{" "}
+                <code>src/lib/cost.ts</code>.
               </>
             )}
           </span>
@@ -76,7 +78,11 @@ export default function CostTab() {
       )}
 
       <div className="tiles">
-        <StatCard label="Estimated cost" value={usd(summary.totalCost)} detail={`${summary.models.length} model${summary.models.length === 1 ? "" : "s"}`} />
+        <StatCard
+          label="Estimated cost"
+          value={usd(summary.totalCost)}
+          detail={`${summary.models.length} model${summary.models.length === 1 ? "" : "s"}`}
+        />
         <StatCard
           label="Tokens"
           value={compact(summary.totalTokens)}
@@ -101,10 +107,7 @@ export default function CostTab() {
             <CartesianGrid vertical={false} stroke={GRID_STROKE} />
             <XAxis dataKey="day" tickFormatter={shortDay} tick={AXIS_TICK} axisLine={AXIS_LINE} tickLine={false} />
             <YAxis tickFormatter={(v: number) => usd(v)} tick={AXIS_TICK} axisLine={false} tickLine={false} width={58} />
-            <Tooltip
-              cursor={{ fill: "var(--gridline)", opacity: 0.35 }}
-              content={<VizTooltip format={usd} labelFormat={shortDay} />}
-            />
+            <Tooltip cursor={{ fill: "var(--gridline)", opacity: 0.35 }} content={<VizTooltip format={usd} labelFormat={shortDay} />} />
             {stackKeys.map((m, i) => (
               <Bar
                 key={m}
@@ -115,7 +118,8 @@ export default function CostTab() {
                 strokeWidth={2}
                 maxBarSize={24}
                 radius={i === stackKeys.length - 1 ? [4, 4, 0, 0] : undefined}
-               isAnimationActive={false} />
+                isAnimationActive={false}
+              />
             ))}
           </BarChart>
         </ResponsiveContainer>
@@ -130,7 +134,14 @@ export default function CostTab() {
             rows: summary.tokensByDay.map((r) => [shortDay(r.day), r.prompt, r.completion]),
             numeric: [1, 2],
           }}
-          legend={<VizLegend items={[{ label: "prompt", color: seriesColor(0, dark) }, { label: "completion", color: seriesColor(1, dark) }]} />}
+          legend={
+            <VizLegend
+              items={[
+                { label: "prompt", color: seriesColor(0, dark) },
+                { label: "completion", color: seriesColor(1, dark) },
+              ]}
+            />
+          }
         >
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={summary.tokensByDay} margin={{ top: 4, right: 8, left: 4, bottom: 0 }}>
@@ -138,8 +149,27 @@ export default function CostTab() {
               <XAxis dataKey="day" tickFormatter={shortDay} tick={AXIS_TICK} axisLine={AXIS_LINE} tickLine={false} />
               <YAxis tickFormatter={(v: number) => compact(v)} tick={AXIS_TICK} axisLine={false} tickLine={false} width={48} />
               <Tooltip cursor={{ fill: "var(--gridline)", opacity: 0.35 }} content={<VizTooltip format={compact} labelFormat={shortDay} />} />
-              <Bar dataKey="prompt" name="prompt" stackId="tok" fill={seriesColor(0, dark)} stroke="var(--surface-1)" strokeWidth={2} maxBarSize={24}  isAnimationActive={false} />
-              <Bar dataKey="completion" name="completion" stackId="tok" fill={seriesColor(1, dark)} stroke="var(--surface-1)" strokeWidth={2} maxBarSize={24} radius={[4, 4, 0, 0]}  isAnimationActive={false} />
+              <Bar
+                dataKey="prompt"
+                name="prompt"
+                stackId="tok"
+                fill={seriesColor(0, dark)}
+                stroke="var(--surface-1)"
+                strokeWidth={2}
+                maxBarSize={24}
+                isAnimationActive={false}
+              />
+              <Bar
+                dataKey="completion"
+                name="completion"
+                stackId="tok"
+                fill={seriesColor(1, dark)}
+                stroke="var(--surface-1)"
+                strokeWidth={2}
+                maxBarSize={24}
+                radius={[4, 4, 0, 0]}
+                isAnimationActive={false}
+              />
             </BarChart>
           </ResponsiveContainer>
         </ChartCard>
@@ -152,7 +182,14 @@ export default function CostTab() {
             rows: summary.latencyByDay.map((r) => [shortDay(r.day), fmtMs(r.p50), fmtMs(r.p95)]),
             numeric: [1, 2],
           }}
-          legend={<VizLegend items={[{ label: "p50", color: seriesColor(0, dark), mark: "line" }, { label: "p95", color: seriesColor(1, dark), mark: "line" }]} />}
+          legend={
+            <VizLegend
+              items={[
+                { label: "p50", color: seriesColor(0, dark), mark: "line" },
+                { label: "p95", color: seriesColor(1, dark), mark: "line" },
+              ]}
+            />
+          }
         >
           <ResponsiveContainer width="100%" height={200}>
             <LineChart data={summary.latencyByDay} margin={{ top: 8, right: 12, left: 4, bottom: 0 }}>
@@ -160,8 +197,28 @@ export default function CostTab() {
               <XAxis dataKey="day" tickFormatter={shortDay} tick={AXIS_TICK} axisLine={AXIS_LINE} tickLine={false} />
               <YAxis tickFormatter={(v: number) => fmtMs(v)} tick={AXIS_TICK} axisLine={false} tickLine={false} width={50} />
               <Tooltip cursor={{ stroke: "var(--baseline)" }} content={<VizTooltip format={(v) => fmtMs(v)} labelFormat={shortDay} />} />
-              <Line type="monotone" dataKey="p50" name="p50" stroke={seriesColor(0, dark)} strokeWidth={2} connectNulls dot={false} activeDot={{ r: 5 }}  isAnimationActive={false} />
-              <Line type="monotone" dataKey="p95" name="p95" stroke={seriesColor(1, dark)} strokeWidth={2} connectNulls dot={false} activeDot={{ r: 5 }}  isAnimationActive={false} />
+              <Line
+                type="monotone"
+                dataKey="p50"
+                name="p50"
+                stroke={seriesColor(0, dark)}
+                strokeWidth={2}
+                connectNulls
+                dot={false}
+                activeDot={{ r: 5 }}
+                isAnimationActive={false}
+              />
+              <Line
+                type="monotone"
+                dataKey="p95"
+                name="p95"
+                stroke={seriesColor(1, dark)}
+                strokeWidth={2}
+                connectNulls
+                dot={false}
+                activeDot={{ r: 5 }}
+                isAnimationActive={false}
+              />
             </LineChart>
           </ResponsiveContainer>
         </ChartCard>
@@ -208,40 +265,41 @@ export default function CostTab() {
               </table>
             </div>
           ) : (
-          <div style={{ position: "relative" }}>
-            <ResponsiveContainer width="100%" height={200}>
-              <PieChart>
-                <Pie
-                  data={donutData}
-                  dataKey="value"
-                  nameKey="name"
-                  innerRadius="62%"
-                  outerRadius="92%"
-                  paddingAngle={2}
-                  stroke="var(--surface-1)"
-                  strokeWidth={2}
-                 isAnimationActive={false}>
-                  {donutData.map((d) => (
-                    <Cell key={d.name} fill={d.name === "Other" ? (dark ? OTHER_DARK : OTHER_LIGHT) : modelColor(d.name)} />
-                  ))}
-                </Pie>
-                <Tooltip content={<VizTooltip format={usd} />} />
-              </PieChart>
-            </ResponsiveContainer>
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                display: "grid",
-                placeItems: "center",
-                pointerEvents: "none",
-                fontWeight: 650,
-                fontSize: 18,
-              }}
-            >
-              {usd(summary.totalCost)}
+            <div style={{ position: "relative" }}>
+              <ResponsiveContainer width="100%" height={200}>
+                <PieChart>
+                  <Pie
+                    data={donutData}
+                    dataKey="value"
+                    nameKey="name"
+                    innerRadius="62%"
+                    outerRadius="92%"
+                    paddingAngle={2}
+                    stroke="var(--surface-1)"
+                    strokeWidth={2}
+                    isAnimationActive={false}
+                  >
+                    {donutData.map((d) => (
+                      <Cell key={d.name} fill={d.name === "Other" ? (dark ? OTHER_DARK : OTHER_LIGHT) : modelColor(d.name)} />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<VizTooltip format={usd} />} />
+                </PieChart>
+              </ResponsiveContainer>
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  display: "grid",
+                  placeItems: "center",
+                  pointerEvents: "none",
+                  fontWeight: 650,
+                  fontSize: 18,
+                }}
+              >
+                {usd(summary.totalCost)}
+              </div>
             </div>
-          </div>
           )}
         </ChartCard>
       </div>
@@ -266,7 +324,10 @@ export default function CostTab() {
             <tbody>
               {summary.models.map((m) => (
                 <tr key={m.model}>
-                  <td className="strong">{m.model}{m.priced ? "" : " ⚠ unpriced"}</td>
+                  <td className="strong">
+                    {m.model}
+                    {m.priced ? "" : " ⚠ unpriced"}
+                  </td>
                   <td className="num">{compact(m.calls)}</td>
                   <td className="num">{compact(m.promptTokens)}</td>
                   <td className="num">{compact(m.completionTokens)}</td>
@@ -284,34 +345,34 @@ export default function CostTab() {
       </ChartCard>
 
       <div className="grid-21">
-      <ChartCard title="Top runs by cost" sub="agent instances ranked by estimated cost">
-        <div className="table-scroll">
-          <table className="viz">
-            <thead>
-              <tr>
-                <th>Run</th>
-                <th>Agent</th>
-                <th>Started</th>
-                <th className="num">LLM calls</th>
-                <th className="num">Tokens</th>
-                <th className="num">Cost</th>
-              </tr>
-            </thead>
-            <tbody>
-              {summary.byInstance.map((r) => (
-                <tr key={r.instanceId}>
-                  <td>{shortId(r.instanceId)}</td>
-                  <td>{agentName(r.agentId)}</td>
-                  <td>{fmtWhen(r.startedAt)}</td>
-                  <td className="num">{r.calls}</td>
-                  <td className="num">{compact(r.tokens)}</td>
-                  <td className="num strong">{usd(r.cost)}</td>
+        <ChartCard title="Top runs by cost" sub="agent instances ranked by estimated cost">
+          <div className="table-scroll">
+            <table className="viz">
+              <thead>
+                <tr>
+                  <th>Run</th>
+                  <th>Agent</th>
+                  <th>Started</th>
+                  <th className="num">LLM calls</th>
+                  <th className="num">Tokens</th>
+                  <th className="num">Cost</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </ChartCard>
+              </thead>
+              <tbody>
+                {summary.byInstance.map((r) => (
+                  <tr key={r.instanceId}>
+                    <td>{shortId(r.instanceId)}</td>
+                    <td>{agentName(r.agentId)}</td>
+                    <td>{fmtWhen(r.startedAt)}</td>
+                    <td className="num">{r.calls}</td>
+                    <td className="num">{compact(r.tokens)}</td>
+                    <td className="num strong">{usd(r.cost)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </ChartCard>
 
         <ChartCard
           title="Finish reasons"

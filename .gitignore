@@ -3,3 +3,6 @@ dist/
 data/
 .env
 *.log
+coverage/
+test-results/
+playwright-report/

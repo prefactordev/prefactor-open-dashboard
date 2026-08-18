@@ -7,7 +7,18 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxi
 import { useDashboard } from "../state";
 import { summarizeNativeQuality } from "../lib/quality";
 import { hourOfWeekHeatmap, spansBySchemaByDay } from "../lib/activity";
-import { AXIS_LINE, AXIS_TICK, ChartCard, EmptyState, GRID_STROKE, heatmapTable, HourHeatmap, StatCard, VizLegend, VizTooltip } from "../components/viz";
+import {
+  AXIS_LINE,
+  AXIS_TICK,
+  ChartCard,
+  EmptyState,
+  GRID_STROKE,
+  heatmapTable,
+  HourHeatmap,
+  StatCard,
+  VizLegend,
+  VizTooltip,
+} from "../components/viz";
 import { assignSlots, seriesColor, OTHER_DARK, OTHER_LIGHT, STATUS } from "../palette";
 import { useIsDark } from "../useTheme";
 import { ActionsChartCard, ActionsTile, useActions } from "../components/ActionsSection";
@@ -53,8 +64,8 @@ export default function QualityPrefactorTab() {
     return (
       <EmptyState title="No agent runs in this window">
         <p>
-          This tab reads run outcomes, durations, and platform feedback from registered agent instances. Widen the time range, or check
-          that your agents register instances via the SDK.
+          This tab reads run outcomes, durations, and platform feedback from registered agent instances. Widen the time range, or check that your
+          agents register instances via the SDK.
         </p>
       </EmptyState>
     );
@@ -128,7 +139,8 @@ export default function QualityPrefactorTab() {
                 strokeWidth={2}
                 maxBarSize={24}
                 radius={i === OUTCOME_KEYS.length - 1 ? [4, 4, 0, 0] : undefined}
-               isAnimationActive={false} />
+                isAnimationActive={false}
+              />
             ))}
           </BarChart>
         </ResponsiveContainer>
@@ -143,14 +155,21 @@ export default function QualityPrefactorTab() {
             rows: summary.feedbackByDay.map((r) => [shortDay(r.day), r.up, r.down]),
             numeric: [1, 2],
           }}
-          legend={<VizLegend items={[{ label: "up", color: STATUS.good }, { label: "down", color: STATUS.critical }]} />}
+          legend={
+            <VizLegend
+              items={[
+                { label: "up", color: STATUS.good },
+                { label: "down", color: STATUS.critical },
+              ]}
+            />
+          }
         >
           {summary.feedback.up + summary.feedback.down === 0 ? (
             <div className="empty">
               <h4>No feedback spans in this window</h4>
               <p>
-                Thumbs appear when your app records a span carrying <code>inputs.feedback.rating</code> or{" "}
-                <code>inputs.rating</code> set to "up" / "down" — the schema name doesn't matter.
+                Thumbs appear when your app records a span carrying <code>inputs.feedback.rating</code> or <code>inputs.rating</code> set to "up" /
+                "down" — the schema name doesn't matter.
               </p>
             </div>
           ) : (
@@ -160,8 +179,27 @@ export default function QualityPrefactorTab() {
                 <XAxis dataKey="day" tickFormatter={shortDay} tick={AXIS_TICK} axisLine={AXIS_LINE} tickLine={false} />
                 <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} width={40} allowDecimals={false} />
                 <Tooltip cursor={{ fill: "var(--gridline)", opacity: 0.35 }} content={<VizTooltip labelFormat={shortDay} />} />
-                <Bar dataKey="up" name="up" stackId="fb" fill={STATUS.good} stroke="var(--surface-1)" strokeWidth={2} maxBarSize={24}  isAnimationActive={false} />
-                <Bar dataKey="down" name="down" stackId="fb" fill={STATUS.critical} stroke="var(--surface-1)" strokeWidth={2} maxBarSize={24} radius={[4, 4, 0, 0]}  isAnimationActive={false} />
+                <Bar
+                  dataKey="up"
+                  name="up"
+                  stackId="fb"
+                  fill={STATUS.good}
+                  stroke="var(--surface-1)"
+                  strokeWidth={2}
+                  maxBarSize={24}
+                  isAnimationActive={false}
+                />
+                <Bar
+                  dataKey="down"
+                  name="down"
+                  stackId="fb"
+                  fill={STATUS.critical}
+                  stroke="var(--surface-1)"
+                  strokeWidth={2}
+                  maxBarSize={24}
+                  radius={[4, 4, 0, 0]}
+                  isAnimationActive={false}
+                />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -200,7 +238,8 @@ export default function QualityPrefactorTab() {
                 strokeWidth={2}
                 maxBarSize={24}
                 radius={i === actKeys.length - 1 ? [4, 4, 0, 0] : undefined}
-               isAnimationActive={false} />
+                isAnimationActive={false}
+              />
             ))}
           </BarChart>
         </ResponsiveContainer>
