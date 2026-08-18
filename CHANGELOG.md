@@ -4,6 +4,13 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project uses
 [Semantic Versioning](https://semver.org/).
 
+## 1.0.0 (2026-08-18)
+
+
+### Features
+
+* tests, CI, browser e2e, Docker, release automation, community docs ([8f69339](https://github.com/prefactordev/prefactor-open-dashboard/commit/8f693390749b75b580cdad7198538dad4d8f34b3))
+
 ## [Unreleased]
 
 ### Added
